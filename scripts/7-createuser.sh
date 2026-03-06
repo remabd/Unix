@@ -9,14 +9,14 @@ else
         exit 1
     fi
     # On demande une info
-    echo "login"
+    echo -n "login"
     # On lit la réponse et on l'ayffecte à une variable
     read login
 
     # On lance le script pour vérifier si un utilisateur existe pour ce login
-    test=$(./6-finduser.sh "${login}")
+    test=$(./6-finduser.sh "$login")
     # Si oui
-    if ! [[ "${test}" = "Error: user not found" ]]; then
+    if ! [[ "$test" = "Error: user not found" ]]; then
         # On affiche une erreur
         echo "Error: user used"
         # On met fin au script
@@ -24,26 +24,29 @@ else
     fi
     # Sinon
 
-    echo "Nom"
+    echo -n "Nom"
     read name
-    echo "Prenom"
+    echo -n "Prenom"
     read firstname
-    echo "UID"
+    echo -n "UID"
     read uid
-    echo "GID"
+    echo -n "GID"
     read gid
-    echo "Commentaires"
+    echo -n "Commentaires"
     read comments
-    echo "Password"
+    echo -n "Password"
     read password
-    # echo "Confirm password"
-    # read password2
-    #
-    # if [ password != password2 ]; then
-    #
 
     # On crée l'utilisateur
-    useradd -Nm -p ${password} -g ${gid} -u ${uid} -c ${comments} ${login}
-    # On crée un répertoire pour le nouvel utilisateur
-    # mkdir /home/${login}
+    useradd -NM -p "$password" -g "$gid" -u "$uid" -c "$comments" "$login"
+    passwd
+    # On vérifie que le home est disponible
+    if [ ! -d "home/$login" ]; then
+        # On crée un répertoire pour le nouvel utilisateur
+        mkdir "/home/$login"
+        # On lui donne la propriété du dossier
+        chown "$login:$gid" "home/$login"
+        # On lui donne les bons droits: ecriture lecture execution pour l'utilisateur seulement
+        chmod 700 "home/$login"
+    fi
 fi
